@@ -1,6 +1,4 @@
-- integrate password into form
-
-- display users in admin panel (FUCK JINJA)
+- display users in admin panel
 
 - CSS!!!!!!!!
 
