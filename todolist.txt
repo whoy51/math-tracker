@@ -1,0 +1,9 @@
+- combine stuff in db
+
+- integrate password into form
+
+- display users in admin panel (FUCK JINJA)
+
+- CSS!!!!!!!!
+
+- Admin auth (we aren't goin hardcore on this, there aint gonna be any mlg hackers trying to exploit this system :))

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<h1>Register</h1>
+<form action="" method="post">
+    <p>
+        {{ form.name.label }}
+        {{ form.name }}
+    </p>
+    <p>
+        {{ form.studentid.label }}
+        {{ form.studentid }}
+    </p>
+    <p>
+        {{ form.key.label }}
+        {{ form.key }}
+    </p>
+    <p>
+        {{ form.submit }}
+    </p>
+</form>
+
+
+{% endblock %}

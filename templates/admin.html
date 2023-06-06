@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Admin Panel</h1>
+
+<p>Password: {{ password }}</p>
+
+<p>Click below to change the access key</p>
+
+<form action="" method="post">
+    <p>
+        {{ form.submit() }}
+    </p>
+</form>
+
+{% endblock %}
