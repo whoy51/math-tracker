@@ -14,4 +14,25 @@
     </p>
 </form>
 
+<button id="copy-button" onclick="copyToClipboard()">Copy Text</button>
+
+<script>
+    function copyToClipboard() {
+        var textToCopy = "{{ password }}";
+
+        navigator.clipboard.writeText(textToCopy)
+            .then(function() {
+                const p = document.createElement("p");
+                p.innerHTML = "Copied to clipboard!";
+                document.body.appendChild(p);
+                setTimeout(function() {
+                    p.remove();
+                }, 1800);
+            })
+            .catch(function(error) {
+                alert("Failed to copy text to clipboard: " + error);
+            });
+    }
+</script>
+
 {% endblock %}

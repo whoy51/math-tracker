@@ -18,6 +18,9 @@
         {{ form.key.label }}
         {{ form.key }}
     </p>
+    {% if message %}
+    <p><strong>Message:</strong> {{ message }}</p>
+    {% endif %}
     <p>
         {{ form.submit }}
     </p>

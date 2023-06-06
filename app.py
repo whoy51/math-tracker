@@ -2,12 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.validators import InputRequired, Length, ValidationError
+from wtforms.validators import InputRequired, Length
 import sqlite3
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 conn = sqlite3.connect('database.db')
@@ -16,31 +15,23 @@ cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINC
             "attends INTEGER)")
 conn.commit()
 cur.close()
-
-password = '12345678'
+accesskey = ''
 
 
 def generateRandomAccessKey():
     import random
     import string
-    global password
-    password = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
+    global accesskey
+    accesskey = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(4))
 
 
 generateRandomAccessKey()
 
 
-
-
-
 class RegisterForm(FlaskForm):
     name = StringField('Full name', validators=[InputRequired(), Length(min=4, max=80)])
     studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=7)])
-    key = StringField('Access Key', validators=[InputRequired(), Length(min=8, max=8)])
-
-    def is_password(form, field):
-        if field.data != password:
-            raise ValidationError('Wrong access key')
+    key = StringField('Access Key', validators=[InputRequired(), Length(min=4, max=4)])
     submit = SubmitField('Sign Up')
 
 
@@ -52,12 +43,14 @@ class SQLStatementForm(FlaskForm):
     sqlstatement = StringField('SQL Statement', validators=[InputRequired()])
     submit = SubmitField('Submit')
 
+
 # SELECT id FROM students WHERE name = '9258830)
 @app.route('/', methods=['GET', 'POST'])
 def index():  # put application's code here
+    form = RegisterForm()
     if request.method == 'GET':
-        return render_template('index.html', form=RegisterForm())
-    if request.method == 'POST':
+        return render_template('index.html', form=form)
+    elif request.method == 'POST' and request.form.get('key') == accesskey:
         name = request.form['name']
         studentid = request.form['studentid']
         conn = sqlite3.connect('database.db')
@@ -71,6 +64,9 @@ def index():  # put application's code here
         conn.commit()
         cur.close()
         return redirect(url_for('sql'))
+    else:
+        print("invalid key")
+        return render_template('index.html', form=form, message="Please ask your teacher for a valid access key")
 
 
 @app.route('/debug', methods=['GET', 'POST'])
@@ -110,10 +106,10 @@ def clear():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if request.method == 'GET':
-        return render_template('admin.html', password=password, form=ChangePasswordForm())
+        return render_template('admin.html', password=accesskey, form=ChangePasswordForm())
     if request.method == 'POST':
         generateRandomAccessKey()
-        print(password)
+        print(accesskey)
         return redirect(url_for('admin'))
 
 
