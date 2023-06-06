@@ -12,7 +12,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 conn = sqlite3.connect('database.db')
 cur = conn.cursor()
-cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT)")
+cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
+            "attends INTEGER)")
 conn.commit()
 cur.close()
 
@@ -61,10 +62,15 @@ def index():  # put application's code here
         studentid = request.form['studentid']
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
-        cur.execute("INSERT INTO students (studentid, name) VALUES (?, ?)", (studentid, name))
+        cur.execute("SELECT attends FROM students WHERE studentid = (?)", [studentid])
+        attends = cur.fetchone()
+        if attends is not None:
+            cur.execute("UPDATE students SET attends = attends + 1 WHERE studentid = (?)", [studentid])
+        else:
+            cur.execute("INSERT INTO students (studentid, name, attends) VALUES (?, ?, 1)", (studentid, name))
         conn.commit()
         cur.close()
-        return redirect(url_for('debug'))
+        return redirect(url_for('sql'))
 
 
 @app.route('/debug', methods=['GET', 'POST'])
@@ -92,7 +98,8 @@ def clear():
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
     cur.execute("DROP TABLE students")
-    cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, "
+                "name TEXT, attends INTEGER)")
     conn.commit()
     rows = cur.fetchall()
     cur.close()
