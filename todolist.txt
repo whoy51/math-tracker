@@ -1,5 +1,7 @@
 - display users in admin panel
 
+- error handling everywhere
+
 - CSS!!!!!!!!
 
 - Admin auth (we aren't goin hardcore on this, there aint gonna be any mlg hackers trying to exploit this system :))
