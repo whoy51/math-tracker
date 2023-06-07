@@ -9,7 +9,7 @@
 
     <table>
       <tr>
-        <th>id</th>
+        <th>Idx</th>
         <th>Time Attended</th>
       </tr>
         {% for item in data %}
@@ -19,5 +19,7 @@
       </tr>
         {% endfor %}
     </table>
+
+    <a href="{{ url_for('admin') }}">Return to teacher</a>
 
 {% endblock %}

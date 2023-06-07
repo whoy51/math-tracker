@@ -29,13 +29,13 @@ generateRandomAccessKey()
 
 class RegisterForm(FlaskForm):
     name = StringField('Full Name', validators=[InputRequired(), Length(min=4, max=80)])
-    studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=7)])
+    studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=8)])
     key = StringField('Access Key', validators=[InputRequired(), Length(min=4, max=4)])
-    submit = SubmitField('Sign Up')
+    submit = SubmitField('Submit')
 
 
-class ChangePasswordForm(FlaskForm):
-    submit = SubmitField('Change Password')
+class ChangeAccessKeyForm(FlaskForm):
+    submit = SubmitField('Change Access Key')
 
 
 class SQLStatementForm(FlaskForm):
@@ -56,6 +56,12 @@ def index():  # put application's code here
         cur = conn.cursor()
         cur.execute("SELECT attends FROM students WHERE studentid = (?)", [studentid])
         attends = cur.fetchone()
+        cur.execute("SELECT time FROM times WHERE studentid = (?)", [studentid])
+        time = cur.fetchall()
+        print(time)
+        print(date.today().strftime("%m-%d-%Y"))
+        if time.__len__() > 0 and date.today().strftime("%m-%d-%Y") in time[0]:
+            return render_template('index.html', form=form, message="You have already signed in today")
         if attends is not None:
             cur.execute("UPDATE students SET attends = attends + 1 WHERE studentid = (?)", [studentid])
         else:
@@ -121,11 +127,10 @@ def admin():
     if request.method == 'GET':
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
-        cur.execute("SELECT name, attends FROM students")
+        cur.execute("SELECT studentid, name, attends FROM students")
         rows = cur.fetchall()
         cur.close()
-        return render_template('admin.html', password=accesskey, form=ChangePasswordForm(), data=rows)
-
+        return render_template('admin.html', password=accesskey, form=ChangeAccessKeyForm(), data=rows)
     if request.method == 'POST':
         generateRandomAccessKey()
         print(accesskey)
