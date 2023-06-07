@@ -1,18 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import InputRequired, Length
+from datetime import date
 import sqlite3
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-db = SQLAlchemy(app)
 conn = sqlite3.connect('database.db')
 cur = conn.cursor()
 cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
             "attends INTEGER)")
+cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
 conn.commit()
 cur.close()
 accesskey = ''
@@ -61,6 +60,7 @@ def index():  # put application's code here
             cur.execute("UPDATE students SET attends = attends + 1 WHERE studentid = (?)", [studentid])
         else:
             cur.execute("INSERT INTO students (studentid, name, attends) VALUES (?, ?, 1)", (studentid, name))
+        cur.execute("INSERT INTO times (studentid, time) VALUES (?, ?)", [studentid, date.today().strftime('%m-%d-%Y')])
         conn.commit()
         cur.close()
         return render_template('success.html')
@@ -74,7 +74,7 @@ def sql():
     if request.method == 'GET':
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
-        cur.execute("SELECT * FROM students")
+        cur.execute("SELECT * FROM times")
         rows = cur.fetchall()
         cur.close()
         return render_template('sql.html', form=SQLStatementForm(), row=rows)
@@ -96,6 +96,8 @@ def clear():
     cur.execute("DROP TABLE students")
     cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, "
                 "name TEXT, attends INTEGER)")
+    cur.execute("DROP TABLE times")
+    cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
     conn.commit()
     rows = cur.fetchall()
     cur.close()
