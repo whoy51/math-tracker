@@ -29,7 +29,7 @@ generateRandomAccessKey()
 
 
 class RegisterForm(FlaskForm):
-    name = StringField('Full name', validators=[InputRequired(), Length(min=4, max=80)])
+    name = StringField('Full Name', validators=[InputRequired(), Length(min=4, max=80)])
     studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=7)])
     key = StringField('Access Key', validators=[InputRequired(), Length(min=4, max=4)])
     submit = SubmitField('Sign Up')
@@ -63,7 +63,7 @@ def index():  # put application's code here
             cur.execute("INSERT INTO students (studentid, name, attends) VALUES (?, ?, 1)", (studentid, name))
         conn.commit()
         cur.close()
-        return redirect(url_for('sql'))
+        return render_template('success.html')
     else:
         print("invalid key")
         return render_template('index.html', form=form, message="Please ask your teacher for a valid access key")
@@ -106,7 +106,13 @@ def clear():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if request.method == 'GET':
-        return render_template('admin.html', password=accesskey, form=ChangePasswordForm())
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("SELECT name, attends FROM students")
+        rows = cur.fetchall()
+        cur.close()
+        return render_template('admin.html', password=accesskey, form=ChangePasswordForm(), data=rows)
+
     if request.method == 'POST':
         generateRandomAccessKey()
         print(accesskey)

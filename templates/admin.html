@@ -4,7 +4,7 @@
 
 <h1>Admin Panel</h1>
 
-<p>Password: {{ password }}</p>
+<p>Access key: {{ password }}</p>
 
 <p>Click below to change the access key</p>
 
@@ -14,7 +14,21 @@
     </p>
 </form>
 
-<button id="copy-button" onclick="copyToClipboard()">Copy Text</button>
+<button id="copy-button" onclick="copyToClipboard()">Copy access key</button>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Attendances</th>
+  </tr>
+    {% for item in data %}
+  <tr>
+    <td>{{ item[0] }}</td>
+    <td>{{ item[1] }}</td>
+  </tr>
+    {% endfor %}
+</table>
+
 
 <script>
     function copyToClipboard() {
