@@ -104,6 +104,17 @@ def clear():
     print(str(rows))
     return str(rows)
 
+@app.route('/student/<studentid>')
+def student(studentid):
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("SELECT id, studentid, time FROM times WHERE studentid = (?)", [studentid])
+    rows = cur.fetchall()
+    cur.execute("SELECT name FROM students WHERE studentid = (?)", [studentid])
+    name = cur.fetchone()[0]
+    cur.close()
+    return render_template('student.html', data=rows, name=name)
+
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
