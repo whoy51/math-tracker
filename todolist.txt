@@ -1,5 +1,3 @@
-- display users in admin panel
-
 - error handling everywhere
 
 - CSS!!!!!!!!

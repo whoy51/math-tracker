@@ -1,12 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import InputRequired, Length
 from datetime import date
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import sqlite3
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
+app.secret_key = 'your_secret_key'
+login_manager = LoginManager()
+login_manager.init_app(app)
 conn = sqlite3.connect('database.db')
 cur = conn.cursor()
 cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
@@ -27,10 +31,29 @@ def generateRandomAccessKey():
 generateRandomAccessKey()
 
 
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+
+    def get_id(self):
+        return str(self.id)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+
 class RegisterForm(FlaskForm):
     name = StringField('Full Name', validators=[InputRequired(), Length(min=4, max=80)])
     studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=8)])
     key = StringField('Access Key', validators=[InputRequired(), Length(min=4, max=4)])
+    submit = SubmitField('Submit')
+
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=80)])
+    password = StringField('Password', validators=[InputRequired(), Length(min=4, max=80)])
     submit = SubmitField('Submit')
 
 
@@ -75,7 +98,31 @@ def index():  # put application's code here
         return render_template('index.html', form=form, message="Please ask your teacher for a valid access key")
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username == 'admin' and password == 'password':
+            user = User(1)
+            login_user(user)
+
+            return redirect(url_for('admin'))
+
+        flash('Invalid username or password')
+
+    return render_template('login.html', form=LoginForm())
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
 @app.route('/debug', methods=['GET', 'POST'])
+@login_required
 def sql():
     if request.method == 'GET':
         conn = sqlite3.connect('database.db')
@@ -96,6 +143,7 @@ def sql():
 
 
 @app.route('/clear')
+@login_required
 def clear():
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
@@ -110,7 +158,9 @@ def clear():
     print(str(rows))
     return str(rows)
 
+
 @app.route('/student/<studentid>')
+@login_required
 def student(studentid):
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
@@ -123,6 +173,7 @@ def student(studentid):
 
 
 @app.route('/admin', methods=['GET', 'POST'])
+@login_required
 def admin():
     if request.method == 'GET':
         conn = sqlite3.connect('database.db')
@@ -138,4 +189,4 @@ def admin():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
