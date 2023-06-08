@@ -95,6 +95,7 @@ def index():  # put application's code here
         return render_template('success.html')
     else:
         print("invalid key")
+        flash("Please ask your teacher for a valid access key")
         return render_template('index.html', form=form, message="Please ask your teacher for a valid access key")
 
 

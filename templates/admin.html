@@ -37,12 +37,7 @@
 
         navigator.clipboard.writeText(textToCopy)
             .then(function() {
-                const p = document.createElement("p");
-                p.innerHTML = "Copied to clipboard!";
-                document.body.appendChild(p);
-                setTimeout(function() {
-                    p.remove();
-                }, 1800);
+                alert("Copied to clipboard successfully!");
             })
             .catch(function(error) {
                 alert("Failed to copy text to clipboard: " + error);
