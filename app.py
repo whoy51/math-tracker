@@ -4,11 +4,12 @@ from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import InputRequired, Length
 from datetime import date
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from config import SECRET_KEY
 import sqlite3
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
-app.secret_key = 'your_secret_key'
+app.config['SECRET_KEY'] = SECRET_KEY
+app.secret_key = SECRET_KEY
 login_manager = LoginManager()
 login_manager.init_app(app)
 conn = sqlite3.connect('database.db')
@@ -47,8 +48,26 @@ def load_user(user_id):
 class RegisterForm(FlaskForm):
     name = StringField('Full Name', validators=[InputRequired(), Length(min=4, max=80)])
     studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=8)])
-    teacher = SelectField('Teacher', choices=[('Ms. Guo', 'Ms. Guo'), ('Mr. Jacoby', 'Mr. Jacoby'),
-                                              ('Ms. Zhang', 'Ms. Zhang')])
+    teacher = SelectField('Teacher', choices=[
+        ('Mr. Casey', 'Mr. Casey'),
+        ('Mr. Coster', 'Mr. Coster'),
+        ('Mr. Feiler', 'Mr. Feiler'),
+        ('Ms. Forth', 'Ms. Forth'),
+        ('Mr. Franke', 'Mr. Franke'),
+        ('Mr. Glasspiegel', 'Mr. Glasspiegel'),
+        ('Ms. Guo', 'Ms. Guo'),
+        ('Ms. Horowitz', 'Ms. Horowitz'),
+        ('Mr. Jacoby', 'Mr. Jacoby'),
+        ('Mr. Kamara', 'Mr. Kamara'),
+        ('Mr. Ntumba', 'Mr. Ntumba'),
+        ('Ms. Reyes', 'Ms. Reyes'),
+        ('Mr. Rickard', 'Mr. Rickard'),
+        ('Mr. Robi', 'Mr. Robi'),
+        ('Ms. Satlin', 'Ms. Satlin'),
+        ('Mr. Singer', 'Mr. Singer'),
+        ('Ms. Hongquin Zhang', 'Ms. Hongquin Zhang'),
+        ('Ms. Yuan Zhang', 'Ms. Yuan Zhang')
+    ])
     key = StringField('Access Key', validators=[InputRequired(), Length(min=4, max=4)])
     submit = SubmitField('Submit')
 
