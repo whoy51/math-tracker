@@ -8,7 +8,7 @@ if count < 2:
     print("Usage: python3 database_setup.py <username> <password>")
     exit(1)
 
-input("This will delete all data in the database. Press enter to continue...")
+input("This will erase data. Press enter to continue...")
 
 conn = sqlite3.connect('database.db')
 cur = conn.cursor()
