@@ -20,12 +20,14 @@
 <table>
   <tr>
     <th>Name</th>
+    <th>Teacher</th>
     <th>Attendances</th>
   </tr>
     {% for item in data %}
   <tr>
     <td><a href="/student/{{ item[0] }}">{{ item[1] }}</a></td>
     <td>{{ item[2] }}</td>
+    <td>{{ item[3] }}</td>
   </tr>
     {% endfor %}
 </table>
@@ -33,7 +35,7 @@
 
 <script>
     function copyToClipboard() {
-        var textToCopy = "{{ password }}";
+        const textToCopy = "{{ password }}";
 
         navigator.clipboard.writeText(textToCopy)
             .then(function() {

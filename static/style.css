@@ -47,7 +47,7 @@ body {
 .login-form .input-field {
   padding: 12px 5px;
 }
-.login-form .input-field input {
+.login-form .input-field input, select {
   font-size: 16px;
   display: block;
   font-family: 'Rubik', sans-serif;
@@ -59,22 +59,22 @@ body {
   -webkit-transition: all .2s;
   transition: all .2s;
 }
-.login-form .input-field input::-webkit-input-placeholder {
-  text-transform: uppercase;
-}
-.login-form .input-field input::-moz-placeholder {
-  text-transform: uppercase;
-}
-.login-form .input-field input:-ms-input-placeholder {
-  text-transform: uppercase;
-}
-.login-form .input-field input::-ms-input-placeholder {
-  text-transform: uppercase;
-}
-.login-form .input-field input::placeholder {
-  text-transform: uppercase;
-}
-.login-form .input-field input:focus {
+/*.login-form .input-field input, select::-webkit-input-placeholder {*/
+/*  text-transform: uppercase;*/
+/*}*/
+/*.login-form .input-field input, select::-moz-placeholder {*/
+/*  text-transform: uppercase;*/
+/*}*/
+/*.login-form .input-field input, select:-ms-input-placeholder {*/
+/*  text-transform: uppercase;*/
+/*}*/
+/*.login-form .input-field input, select::-ms-input-placeholder {*/
+/*  text-transform: uppercase;*/
+/*}*/
+/*.login-form .input-field input, select::placeholder {*/
+/*  text-transform: uppercase;*/
+/*}*/
+.login-form .input-field input, select:focus {
   border-color: #222;
 }
 .login-form a.link {

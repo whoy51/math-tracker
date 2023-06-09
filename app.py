@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import InputRequired, Length
 from datetime import date
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 import sqlite3
 
 app = Flask(__name__)
@@ -14,7 +14,7 @@ login_manager.init_app(app)
 conn = sqlite3.connect('database.db')
 cur = conn.cursor()
 cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
-            "attends INTEGER)")
+            "teacher TEXT, attends INTEGER)")
 cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
 conn.commit()
 cur.close()
@@ -47,6 +47,8 @@ def load_user(user_id):
 class RegisterForm(FlaskForm):
     name = StringField('Full Name', validators=[InputRequired(), Length(min=4, max=80)])
     studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=8)])
+    teacher = SelectField('Teacher', choices=[('Ms. Guo', 'Ms. Guo'), ('Mr. Jacoby', 'Mr. Jacoby'),
+                                              ('Ms. Zhang', 'Ms. Zhang')])
     key = StringField('Access Key', validators=[InputRequired(), Length(min=4, max=4)])
     submit = SubmitField('Submit')
 
@@ -75,6 +77,7 @@ def index():  # put application's code here
     elif request.method == 'POST' and request.form.get('key') == accesskey:
         name = request.form['name']
         studentid = request.form['studentid']
+        teacher = request.form['teacher']
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
         cur.execute("SELECT attends FROM students WHERE studentid = (?)", [studentid])
@@ -88,7 +91,7 @@ def index():  # put application's code here
         if attends is not None:
             cur.execute("UPDATE students SET attends = attends + 1 WHERE studentid = (?)", [studentid])
         else:
-            cur.execute("INSERT INTO students (studentid, name, attends) VALUES (?, ?, 1)", (studentid, name))
+            cur.execute("INSERT INTO students (studentid, name, teacher, attends) VALUES (?, ?, ?, 1)", (studentid, name, teacher))
         cur.execute("INSERT INTO times (studentid, time) VALUES (?, ?)", [studentid, date.today().strftime('%m-%d-%Y')])
         conn.commit()
         cur.close()
@@ -149,8 +152,8 @@ def clear():
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
     cur.execute("DROP TABLE students")
-    cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, "
-                "name TEXT, attends INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
+                "teacher TEXT, attends INTEGER)")
     cur.execute("DROP TABLE times")
     cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
     conn.commit()
@@ -179,7 +182,7 @@ def admin():
     if request.method == 'GET':
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
-        cur.execute("SELECT studentid, name, attends FROM students")
+        cur.execute("SELECT studentid, name, teacher, attends FROM students")
         rows = cur.fetchall()
         cur.close()
         return render_template('admin.html', password=accesskey, form=ChangeAccessKeyForm(), data=rows)
