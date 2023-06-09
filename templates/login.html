@@ -5,20 +5,32 @@
 {% block content %}
 
 
-<h1>Teacher Login</h1>
-<form action="" method="post">
-    <p>
-        {{ form.username.label }}
-        {{ form.username }}
-    </p>
-    <p>
-        {{ form.password.label }}
-        {{ form.password }}
-    </p>
-    <p>
-        {{ form.submit }}
-    </p>
-</form>
+
+<div class="login-form">
+    <form action="" method="post">
+        <h1>Teacher Login</h1>
+        <div class="content">
+                <div class="input-field">
+                    {{ form.username.label }}
+                    {{ form.username }}
+                </div>
+                <div class="input-field">
+                    {{ form.password.label }}
+                    {{ form.password }}
+                </div>
+        </div>
+        <div class="action">
+            {{ form.submit }}
+        </div>
+    </form>
+</div>
+
+<style>
+    body {
+        background: #e358e1;
+    }
+
+</style>
 
 
 {% endblock %}
