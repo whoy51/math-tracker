@@ -21,6 +21,13 @@ conn.commit()
 cur.close()
 accesskey = ''
 
+conn = sqlite3.connect('database.db')
+cur = conn.cursor()
+cur.execute("SELECT username FROM teachers")
+username = cur.fetchall()
+cur.close()
+
+print(username)
 
 def generateRandomAccessKey():
     import random
@@ -46,34 +53,27 @@ def load_user(user_id):
 
 
 class RegisterForm(FlaskForm):
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("SELECT username, username FROM teachers WHERE admin = FALSE")
+    username = cur.fetchall()
+    cur.close()
+
     name = StringField('Full Name', validators=[InputRequired(), Length(min=4, max=80)])
     studentid = StringField('Student ID', validators=[InputRequired(), Length(min=7, max=8)])
-    teacher = SelectField('Teacher', choices=[
-        ('Mr. Casey', 'Mr. Casey'),
-        ('Mr. Coster', 'Mr. Coster'),
-        ('Mr. Feiler', 'Mr. Feiler'),
-        ('Ms. Forth', 'Ms. Forth'),
-        ('Mr. Franke', 'Mr. Franke'),
-        ('Mr. Glasspiegel', 'Mr. Glasspiegel'),
-        ('Ms. Guo', 'Ms. Guo'),
-        ('Ms. Horowitz', 'Ms. Horowitz'),
-        ('Mr. Jacoby', 'Mr. Jacoby'),
-        ('Mr. Kamara', 'Mr. Kamara'),
-        ('Mr. Ntumba', 'Mr. Ntumba'),
-        ('Ms. Reyes', 'Ms. Reyes'),
-        ('Mr. Rickard', 'Mr. Rickard'),
-        ('Mr. Robi', 'Mr. Robi'),
-        ('Ms. Satlin', 'Ms. Satlin'),
-        ('Mr. Singer', 'Mr. Singer'),
-        ('Ms. Hongquin Zhang', 'Ms. Hongquin Zhang'),
-        ('Ms. Yuan Zhang', 'Ms. Yuan Zhang')
-    ])
+    teacher = SelectField('Teacher', choices=username)
     key = StringField('Access Key', validators=[InputRequired(), Length(min=4, max=4)])
     submit = SubmitField('Submit')
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=80)])
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("SELECT username, username FROM teachers")
+    username = cur.fetchall()
+    cur.close()
+
+    username = SelectField('Username', choices=username)
     password = StringField('Password', validators=[InputRequired(), Length(min=4, max=80)])
     submit = SubmitField('Submit')
 

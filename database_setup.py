@@ -18,11 +18,12 @@ cur.execute("DROP TABLE IF EXISTS teachers")
 cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
             "teacher TEXT, attends INTEGER)")
 cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
-cur.execute("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)")
+cur.execute("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, "
+            "admin BOOLEAN)")
 
 print("Database setup complete. Creating admin account with username", arguments[0], "and password", arguments[1], "...")
 
-cur.execute("INSERT INTO teachers (username, password) VALUES (?, ?)", [arguments[0], arguments[1]])
+cur.execute("INSERT INTO teachers (username, password, admin) VALUES (?, ?, TRUE)", [arguments[0], arguments[1]])
 conn.commit()
 
 print("Admin account created. You can now run the app.")
