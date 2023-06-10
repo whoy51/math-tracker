@@ -23,6 +23,7 @@ cur.close()
 
 print(username)
 
+
 def generateRandomAccessKey():
     import random
     import string
@@ -88,9 +89,8 @@ class CreateNewUserForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-# SELECT id FROM students WHERE name = '9258830)
 @app.route('/', methods=['GET', 'POST'])
-def index():  # put application's code here
+def index():
     form = RegisterForm()
     if request.method == 'GET':
         return render_template('index.html', form=form)
@@ -111,7 +111,8 @@ def index():  # put application's code here
         if attends is not None:
             cur.execute("UPDATE students SET attends = attends + 1 WHERE studentid = (?)", [studentid])
         else:
-            cur.execute("INSERT INTO students (studentid, name, teacher, attends) VALUES (?, ?, ?, 1)", (studentid, name, teacher))
+            cur.execute("INSERT INTO students (studentid, name, teacher, attends) VALUES (?, ?, ?, 1)",
+                        (studentid, name, teacher))
         cur.execute("INSERT INTO times (studentid, time) VALUES (?, ?)", [studentid, date.today().strftime('%m-%d-%Y')])
         conn.commit()
         cur.close()
@@ -127,14 +128,6 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
-        # if username == 'admin' and password == 'password':
-        #     user = User(1)
-        #     login_user(user)
-        #
-        #     return redirect(url_for('admin'))
-
-
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
         cur.execute("SELECT username, password FROM teachers WHERE username = (?)", [username])

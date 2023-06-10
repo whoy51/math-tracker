@@ -2,9 +2,13 @@
 {% block title %}Success{% endblock %}
 {% block content %}
 
-<div class="login-form">
-<h1>Form success!</h1>
-<div>
+<div class="card">
+    <h1>Form success!</h1>
+
+    <div class="action add-top-margin">
+    <a href="{{ url_for('index') }}">Return Home</a>
+    </div>
+</div>
 
 
 {% endblock %}
