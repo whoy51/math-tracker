@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
+from wtforms import StringField, SubmitField, SelectField, PasswordField
 from wtforms.validators import InputRequired, Length
 from datetime import date
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from config import SECRET_KEY
+import bcrypt
 import sqlite3
 
 app = Flask(__name__)
@@ -12,13 +13,6 @@ app.config['SECRET_KEY'] = SECRET_KEY
 app.secret_key = SECRET_KEY
 login_manager = LoginManager()
 login_manager.init_app(app)
-conn = sqlite3.connect('database.db')
-cur = conn.cursor()
-cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
-            "teacher TEXT, attends INTEGER)")
-cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
-conn.commit()
-cur.close()
 accesskey = ''
 
 conn = sqlite3.connect('database.db')
@@ -74,16 +68,23 @@ class LoginForm(FlaskForm):
     cur.close()
 
     username = SelectField('Username', choices=username)
-    password = StringField('Password', validators=[InputRequired(), Length(min=4, max=80)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=4, max=80)])
     submit = SubmitField('Submit')
 
 
 class ChangeAccessKeyForm(FlaskForm):
-    submit = SubmitField('Change Access Key')
+    change_key = SubmitField('Change Access Key')
 
 
 class SQLStatementForm(FlaskForm):
     sqlstatement = StringField('SQL Statement', validators=[InputRequired()])
+    submit = SubmitField('Submit')
+
+
+class CreateNewUserForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=80)])
+    password = StringField('Password', validators=[InputRequired(), Length(min=4, max=80)])
+    is_admin = SelectField('Is Admin', choices=[('True', 'True'), ('False', 'False')])
     submit = SubmitField('Submit')
 
 
@@ -127,12 +128,23 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        if username == 'admin' and password == 'password':
-            user = User(1)
-            login_user(user)
+        # if username == 'admin' and password == 'password':
+        #     user = User(1)
+        #     login_user(user)
+        #
+        #     return redirect(url_for('admin'))
 
-            return redirect(url_for('admin'))
 
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("SELECT username, password FROM teachers WHERE username = (?)", [username])
+        user = cur.fetchone()
+        cur.close()
+        if user is not None:
+            if bcrypt.checkpw(password.encode("utf-8"), user[1]):
+                user = User(username)
+                login_user(user)
+                return redirect(url_for('admin'))
         flash('Invalid username or password')
 
     return render_template('login.html', form=LoginForm())
@@ -165,23 +177,6 @@ def sql():
         return render_template('sql.html', form=SQLStatementForm(), row=row)
 
 
-@app.route('/clear')
-@login_required
-def clear():
-    conn = sqlite3.connect('database.db')
-    cur = conn.cursor()
-    cur.execute("DROP TABLE students")
-    cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, name TEXT, "
-                "teacher TEXT, attends INTEGER)")
-    cur.execute("DROP TABLE times")
-    cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
-    conn.commit()
-    rows = cur.fetchall()
-    cur.close()
-    print(str(rows))
-    return str(rows)
-
-
 @app.route('/student/<studentid>')
 @login_required
 def student(studentid):
@@ -204,10 +199,24 @@ def admin():
         cur.execute("SELECT studentid, name, teacher, attends FROM students")
         rows = cur.fetchall()
         cur.close()
-        return render_template('admin.html', password=accesskey, form=ChangeAccessKeyForm(), data=rows)
-    if request.method == 'POST':
+        return render_template('admin.html', password=accesskey, form=ChangeAccessKeyForm(), data=rows,
+                               form2=CreateNewUserForm())
+    if request.method == 'POST' and 'change_key' in request.form:
         generateRandomAccessKey()
         print(accesskey)
+        return redirect(url_for('admin'))
+    else:
+        username = request.form['username']
+        password = request.form['password']
+        is_admin = request.form['is_admin']
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        if is_admin == 'True':
+            cur.execute("INSERT INTO teachers (username, password, admin) VALUES (?, ?, TRUE)", (username, password))
+        else:
+            cur.execute("INSERT INTO teachers (username, password, admin) VALUES (?, ?, FALSE)", (username, password))
+        conn.commit()
+        cur.close()
         return redirect(url_for('admin'))
 
 

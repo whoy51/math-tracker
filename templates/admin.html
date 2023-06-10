@@ -11,7 +11,7 @@
 
 <form action="" method="post">
     <p>
-        {{ form.submit() }}
+        {{ form.change_key() }}
     </p>
 </form>
 
@@ -30,6 +30,27 @@
     <td>{{ item[3] }}</td>
   </tr>
     {% endfor %}
+
+
+<p>Create new teacher accounts</p>
+<form action="" method="post">
+    <p>
+        {{ form2.username.label }}
+        {{ form2.username }}
+    </p>
+    <p>
+        {{ form2.password.label }}
+        {{ form2.password }}
+    </p>
+    <p>
+        {{ form2.is_admin.label }}
+        {{ form2.is_admin }}
+    </p>
+    <p>
+        {{ form2.submit() }}
+    </p>
+</form>
+
 </table>
 
 

@@ -1,5 +1,6 @@
 import sqlite3
 import sys
+import bcrypt
 
 arguments = sys.argv[1:]
 count = len(arguments)
@@ -19,11 +20,17 @@ cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINC
             "teacher TEXT, attends INTEGER)")
 cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
 cur.execute("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, "
-            "admin BOOLEAN)")
+            "salt TEXT, admin BOOLEAN)")
 
-print("Database setup complete. Creating admin account with username", arguments[0], "and password", arguments[1], "...")
 
-cur.execute("INSERT INTO teachers (username, password, admin) VALUES (?, ?, TRUE)", [arguments[0], arguments[1]])
+print("Database setup complete. Creating admin account with username", arguments[0], "and password", arguments[1])
+
+salt = bcrypt.gensalt()
+password = arguments[1].encode("utf-8")
+hashed_password = bcrypt.hashpw(password, salt)
+
+cur.execute("INSERT INTO teachers (username, password, salt, admin) VALUES (?, ?, ?, TRUE)",
+            [arguments[0], hashed_password, salt])
 conn.commit()
 
 print("Admin account created. You can now run the app.")
