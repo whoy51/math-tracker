@@ -15,15 +15,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 accesskey = ''
 
-conn = sqlite3.connect('database.db')
-cur = conn.cursor()
-cur.execute("SELECT username FROM teachers")
-username = cur.fetchall()
-cur.close()
-
-print(username)
-
-
 def generateRandomAccessKey():
     import random
     import string
@@ -178,6 +169,8 @@ def student(studentid):
     cur.execute("SELECT id, studentid, time FROM times WHERE studentid = (?)", [studentid])
     rows = cur.fetchall()
     cur.execute("SELECT name FROM students WHERE studentid = (?)", [studentid])
+    if cur.fetchone() is None:
+        return redirect(url_for('admin'))
     name = cur.fetchone()[0]
     cur.close()
     return render_template('student.html', data=rows, name=name)
