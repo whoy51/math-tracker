@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, PasswordField
 from wtforms.validators import InputRequired, Length
@@ -95,8 +95,6 @@ def index():
         attends = cur.fetchone()
         cur.execute("SELECT time FROM times WHERE studentid = (?)", [studentid])
         time = cur.fetchall()
-        print(time)
-        print(date.today().strftime("%m-%d-%Y"))
         if time.__len__() > 0 and date.today().strftime("%m-%d-%Y") in time[0]:
             return render_template('index.html', form=form, message="You have already signed in today")
         if attends is not None:
@@ -109,8 +107,6 @@ def index():
         cur.close()
         return render_template('success.html')
     else:
-        print("invalid key")
-        flash("Please ask your teacher for a valid access key")
         return render_template('index.html', form=form, message="Please ask your teacher for a valid access key")
 
 
@@ -129,7 +125,6 @@ def login():
                 user = User(username)
                 login_user(user)
                 return redirect(url_for('admin'))
-        flash('Invalid username or password')
 
     return render_template('login.html', form=LoginForm())
 
@@ -189,7 +184,6 @@ def admin():
                                form2=CreateNewUserForm())
     if request.method == 'POST' and 'change_key' in request.form:
         generateRandomAccessKey()
-        print(accesskey)
         return redirect(url_for('admin'))
     else:
         username = request.form['username']
