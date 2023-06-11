@@ -1,1 +1,3 @@
 - CSS!
+
+- split up admin and teacher panels

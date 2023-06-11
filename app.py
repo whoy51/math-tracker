@@ -163,10 +163,14 @@ def student(studentid):
     cur = conn.cursor()
     cur.execute("SELECT id, studentid, time FROM times WHERE studentid = (?)", [studentid])
     rows = cur.fetchall()
+    print(rows)
     cur.execute("SELECT name FROM students WHERE studentid = (?)", [studentid])
-    if cur.fetchone() is None:
+    name = cur.fetchone()
+    print(type(cur.fetchone()))
+    print(cur.fetchone())
+    if not name:
         return redirect(url_for('admin'))
-    name = cur.fetchone()[0]
+    name = name[0]
     cur.close()
     return render_template('student.html', data=rows, name=name)
 
