@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Teacher Panel{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <h1>Teacher Panel</h1>
+
+    <p>Access key: {{ password }}</p>
+
+    <p>Click below to change the access key</p>
+
+    <form action="" method="post">
+        <p>
+            {{ form.change_key() }}
+        </p>
+    </form>
+
+    <button id="copy-button" onclick="copyToClipboard()">Copy access key</button>
+
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Teacher</th>
+        <th>Attendances</th>
+      </tr>
+        {% for item in data %}
+      <tr>
+        <td><a href="/student/{{ item[0] }}">{{ item[1] }}</a></td>
+        <td>{{ item[2] }}</td>
+        <td>{{ item[3] }}</td>
+      </tr>
+        {% endfor %}
+    </table>
+
+
+
+
+
+</div>
+
+<script>
+    function copyToClipboard() {
+        const textToCopy = "{{ password }}";
+
+        navigator.clipboard.writeText(textToCopy)
+            .then(function() {
+                alert("Copied to clipboard successfully!");
+            })
+            .catch(function(error) {
+                alert("Failed to copy text to clipboard: " + error);
+            });
+    }
+</script>
+
+{% endblock %}

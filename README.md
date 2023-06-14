@@ -1,3 +1,8 @@
+# About
+
+This project was created for the Jackson-Reed Math Center so that faculty can keep track of students who attend math center and assure that students are receiving supports, especially if they have a learning plan with the school like an IEP or 504 plan. 
+Some teachers may mandate that their students attend math center for various reasons and this tracker assures the students are completing this task.
+
 # Using
 You must creat a config.py file in the root directory. Create a SECRET_KEY variable like this:
 ```python

@@ -20,7 +20,7 @@ cur.execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINC
             "teacher TEXT, attends INTEGER)")
 cur.execute("CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY AUTOINCREMENT, studentid TEXT, time DATE)")
 cur.execute("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, "
-            "salt TEXT, admin BOOLEAN)")
+            "salt TEXT, is_teacher BOOLEAN)")
 
 
 print("Database setup complete. Creating admin account with username", arguments[0], "and password", arguments[1])
@@ -29,7 +29,7 @@ salt = bcrypt.gensalt()
 password = arguments[1].encode("utf-8")
 hashed_password = bcrypt.hashpw(password, salt)
 
-cur.execute("INSERT INTO teachers (username, password, salt, admin) VALUES (?, ?, ?, TRUE)",
+cur.execute("INSERT INTO teachers (username, password, salt, is_teacher) VALUES (?, ?, ?, FALSE)",
             [arguments[0], hashed_password, salt])
 conn.commit()
 

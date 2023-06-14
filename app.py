@@ -1,3 +1,4 @@
+# import all dependencies
 from flask import Flask, render_template, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, PasswordField
@@ -5,9 +6,9 @@ from wtforms.validators import InputRequired, Length
 from datetime import date
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from config import SECRET_KEY
-import bcrypt
-import sqlite3
+import bcrypt, random, sqlite3, string
 
+# app management
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 app.secret_key = SECRET_KEY
@@ -15,9 +16,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 accesskey = ''
 
+
+# create a random access key
 def generateRandomAccessKey():
-    import random
-    import string
     global accesskey
     accesskey = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(4))
 
@@ -41,7 +42,7 @@ def load_user(user_id):
 class RegisterForm(FlaskForm):
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
-    cur.execute("SELECT username, username FROM teachers WHERE admin = FALSE")
+    cur.execute("SELECT username, username FROM teachers WHERE is_teacher = TRUE")
     username = cur.fetchall()
     cur.close()
 
@@ -76,7 +77,7 @@ class SQLStatementForm(FlaskForm):
 class CreateNewUserForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=80)])
     password = StringField('Password', validators=[InputRequired(), Length(min=4, max=80)])
-    is_admin = SelectField('Is Admin', choices=[('True', 'True'), ('False', 'False')])
+    is_teacher = SelectField('Is Teacher', choices=[('True', 'True'), ('False', 'False')])
     submit = SubmitField('Submit')
 
 
@@ -124,7 +125,7 @@ def login():
             if bcrypt.checkpw(password.encode("utf-8"), user[1]):
                 user = User(username)
                 login_user(user)
-                return redirect(url_for('admin'))
+                return redirect(url_for('teacher'))
 
     return render_template('login.html', form=LoginForm())
 
@@ -163,11 +164,8 @@ def student(studentid):
     cur = conn.cursor()
     cur.execute("SELECT id, studentid, time FROM times WHERE studentid = (?)", [studentid])
     rows = cur.fetchall()
-    print(rows)
     cur.execute("SELECT name FROM students WHERE studentid = (?)", [studentid])
     name = cur.fetchone()
-    print(type(cur.fetchone()))
-    print(cur.fetchone())
     if not name:
         return redirect(url_for('admin'))
     name = name[0]
@@ -175,30 +173,38 @@ def student(studentid):
     return render_template('student.html', data=rows, name=name)
 
 
-@app.route('/admin', methods=['GET', 'POST'])
+@app.route('/teacher', methods=['GET', 'POST'])
 @login_required
-def admin():
+def teacher():
     if request.method == 'GET':
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
         cur.execute("SELECT studentid, name, teacher, attends FROM students")
         rows = cur.fetchall()
         cur.close()
-        return render_template('admin.html', password=accesskey, form=ChangeAccessKeyForm(), data=rows,
-                               form2=CreateNewUserForm())
+        return render_template('teacher.html', password=accesskey, form=ChangeAccessKeyForm(), data=rows)
     if request.method == 'POST' and 'change_key' in request.form:
         generateRandomAccessKey()
-        return redirect(url_for('admin'))
+        return redirect(url_for('teacher'))
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin():
+    if request.method == 'GET':
+        return render_template('admin.html', form=CreateNewUserForm())
     else:
         username = request.form['username']
         password = request.form['password']
-        is_admin = request.form['is_admin']
+        is_teacher = request.form['is_teacher']
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
-        if is_admin == 'True':
-            cur.execute("INSERT INTO teachers (username, password, admin) VALUES (?, ?, TRUE)", (username, password))
+        if is_teacher == 'True':
+            cur.execute("INSERT INTO teachers (username, password, is_teacher) VALUES (?, ?, TRUE)",
+                        (username, password))
         else:
-            cur.execute("INSERT INTO teachers (username, password, admin) VALUES (?, ?, FALSE)", (username, password))
+            cur.execute("INSERT INTO teachers (username, password, is_teacher) VALUES (?, ?, FALSE)",
+                        (username, password))
         conn.commit()
         cur.close()
         return redirect(url_for('admin'))
