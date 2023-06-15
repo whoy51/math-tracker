@@ -4,7 +4,7 @@ This project was created for the Jackson-Reed Math Center so that faculty can ke
 Some teachers may mandate that their students attend math center for various reasons and this tracker assures the students are completing this task.
 
 # Using
-You must creat a config.py file in the root directory. Create a SECRET_KEY variable like this:
+Edit the file 'sample_config.py' and rename it to 'config.py'. Edit the following lines:
 ```python
 SECRET_KEY = 'your_secret_key_here'
 ```
