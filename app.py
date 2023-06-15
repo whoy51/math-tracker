@@ -195,16 +195,19 @@ def admin():
         return render_template('admin.html', form=CreateNewUserForm())
     else:
         username = request.form['username']
-        password = request.form['password']
+        password = request.form['password'].encode("utf-8")
         is_teacher = request.form['is_teacher']
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password, salt)
+
         if is_teacher == 'True':
-            cur.execute("INSERT INTO teachers (username, password, is_teacher) VALUES (?, ?, TRUE)",
-                        (username, password))
+            cur.execute("INSERT INTO teachers (username, password, salt, is_teacher) VALUES (?, ?, ?, FALSE)",
+                        [username, hashed_password, salt])
         else:
-            cur.execute("INSERT INTO teachers (username, password, is_teacher) VALUES (?, ?, FALSE)",
-                        (username, password))
+            cur.execute("INSERT INTO teachers (username, password, salt, is_teacher) VALUES (?, ?, ?, FALSE)",
+                        [username, hashed_password, salt])
         conn.commit()
         cur.close()
         return redirect(url_for('admin'))
