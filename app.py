@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, PasswordField
 from wtforms.validators import InputRequired, Length
 from datetime import date
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from config import SECRET_KEY
 import bcrypt, random, sqlite3, string
 
@@ -27,16 +27,16 @@ generateRandomAccessKey()
 
 
 class User(UserMixin):
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, username):
+        self.username = username
 
     def get_id(self):
-        return str(self.id)
+        return str(self.username)
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
+def load_user(username):
+    return User(username)
 
 
 class RegisterForm(FlaskForm):
@@ -191,6 +191,15 @@ def teacher():
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
+    # check if user is admin
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("SELECT is_teacher FROM teachers WHERE username = (?)", [current_user.username])
+    user = cur.fetchone()
+    cur.close()
+    print(user[0])
+    if user[0] == 1:
+        return redirect(url_for('teacher'))
     if request.method == 'GET':
         return render_template('admin.html', form=CreateNewUserForm())
     else:
@@ -203,7 +212,7 @@ def admin():
         hashed_password = bcrypt.hashpw(password, salt)
 
         if is_teacher == 'True':
-            cur.execute("INSERT INTO teachers (username, password, salt, is_teacher) VALUES (?, ?, ?, FALSE)",
+            cur.execute("INSERT INTO teachers (username, password, salt, is_teacher) VALUES (?, ?, ?, TRUE)",
                         [username, hashed_password, salt])
         else:
             cur.execute("INSERT INTO teachers (username, password, salt, is_teacher) VALUES (?, ?, ?, FALSE)",
